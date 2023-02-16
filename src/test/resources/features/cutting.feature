@@ -7,7 +7,7 @@ Feature: liner cutting
       Then got following result:
       """
       resultContent= ```
-                     100(0):
+                     100(0) 100:
                      | 100 |
                      ```
       """
@@ -18,10 +18,10 @@ Feature: liner cutting
       Then got following result:
       """
       resultContent= ```
-                     50(0):
+                     50(0) 50:
                      | 50 |
 
-                     50(0):
+                     50(0) 50:
                      | 50 |
                      ```
       """
@@ -33,10 +33,10 @@ Feature: liner cutting
       Then got following result:
       """
       resultContent= ```
-                     100(0):
+                     100(0) 100:
                      | 100 |
 
-                     50(0):
+                     50(0) 50:
                      | 50 |
                      ```
       """
@@ -50,7 +50,7 @@ Feature: liner cutting
       Then got following result:
       """
       resultContent= ```
-                     100(1):
+                     100(1) 0:
                      | 100 |
                      | 100 |
                      ```
@@ -75,12 +75,12 @@ Feature: liner cutting
       Then got following result:
       """
       resultContent= ```
-                     50(0):
-                     | 50 |
+                     80(1) 0:
+                     | 80 |
+                     | 80 |
 
-                     80(1):
-                     | 80 |
-                     | 80 |
+                     50(0) 50:
+                     | 50 |
                      ```
       """
 
@@ -93,31 +93,72 @@ Feature: liner cutting
       Then got following result:
       """
       resultContent= ```
-                     50(1):
+                     100(0) 100:
+                     | 100 |
+
+                     50(1) 40:
                      | 50 |
                      | 10 |
-
-                     100(0):
-                     | 100 |
                      ```
       """
 
   Rule: two segment
     Scenario: left more
       Given the following lines:
-        | 100 | 1 |
-        | 60  | 1 |
+        | 95 | 1 |
+        | 60 | 1 |
       When need segments:
         | 50 | 1 |
         | 40 | 1 |
       Then got following result:
       """
       resultContent= ```
-                     100(2):
-                     | 100 |
+                     95(2) 5:
+                     | 95 |
                      | 50 | 40 |
 
-                     60(0):
+                     60(0) 60:
                      | 60 |
+                     ```
+      """
+
+    Scenario: xxx
+      Given the following lines:
+#        | 243  | 2 |
+        | 300  | 1 |
+#        | 260  | 1 |
+        | 570  | 1 |
+        | 480  | 1 |
+        | 355  | 1 |
+        | 795  | 1 |
+        | 765  | 1 |
+        | 650  | 1 |
+        | 665  | 1 |
+        | 1527 | 1 |
+        | 1505 | 1 |
+        | 1610 | 1 |
+        | 1560 | 1 |
+        | 1568 | 1 |
+        | 1555 | 1 |
+
+        | 1615 | 3 |
+        | 850  | 1 |
+
+      When need segments:
+        | 722 | 2 |
+#        | 260 | 1 |
+        | 260 | 1 |
+        | 204 | 2 |
+#        | 204 | 2 |
+        | 290 | 2 |
+        | 693 | 2 |
+        | 824 | 4 |
+        | 824 | 4 |
+        | 253 | 8 |
+        | 956 | 2 |
+        | 313 | 3 |
+      Then got following result:
+      """
+      resultContent= ```
                      ```
       """

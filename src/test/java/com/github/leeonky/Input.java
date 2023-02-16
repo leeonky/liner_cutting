@@ -13,7 +13,7 @@ public class Input {
     }
 
     public String result() {
-        String result = String.format("%d(%d):\n| %d |", style, segments.size(), style);
+        String result = String.format("%d(%d) %d:\n| %d |", style, segments.size(), left(), style);
         if (segments.size() > 0) {
             result += "\n" + segments.stream().map(Object::toString).collect(Collectors.joining(" | ", "| ", " |"));
         }
@@ -30,5 +30,19 @@ public class Input {
 
     public int left() {
         return style - segments.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    public Input copy() {
+        Input input = new Input(style);
+        input.segments.addAll(segments);
+        return input;
+    }
+
+    @Override
+    public String toString() {
+        return "Input{" +
+                "style=" + style +
+                ", segments=" + segments +
+                '}';
     }
 }

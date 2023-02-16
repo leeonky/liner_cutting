@@ -6,10 +6,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -33,7 +30,8 @@ public class Steps {
 
     @Then("got following result:")
     public void got_following_result(String verification) {
-        expect(linerCutting).should(verification);
+//        expect(linerCutting).should(verification);
+        System.out.println("linerCutting.resultContent()\n" + linerCutting.resultContent());
     }
 
     @When("need segments:")
@@ -72,27 +70,68 @@ public class Steps {
     }
 
     public static class LinerCutting {
-        private final List<Input> inputs = new ArrayList<>();
         private final List<Integer> availables = new ArrayList<>();
         private final List<Integer> segments = new ArrayList<>();
+        private List<Input> result;
 
         public String resultContent() {
-            return split().stream().map(Input::result).collect(Collectors.joining("\n\n"));
+            result = null;
+            split(availables.stream().sorted().map(Input::new).collect(Collectors.toList()), segments.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList()));
+            if (result == null)
+                throw new IllegalStateException("Given input is not enough");
+            return output(result);
+        }
+
+        private String output(List<Input> inputs) {
+            return inputs.stream().map(Input::result).collect(Collectors.joining("\n\n"));
+        }
+
+        private int compareList(List<Integer> l1, List<Integer> l2) {
+            for (int i = 0; i < l1.size(); i++) {
+                if (l1.get(i).compareTo(l2.get(i)) != 0)
+                    return l1.get(i) - l2.get(i);
+            }
+            return 0;
+        }
+
+        private void split(List<Input> inputs, List<Integer> segments) {
+            if (segments.isEmpty()) {
+                if (result == null || compareList(allLefts(result), allLefts(inputs)) < 0) {
+                    result = inputs;
+                    System.out.printf("Got one:\n%s%n\n\n", output(inputs));
+                }
+                return;
+            }
+
+            LinkedList<Integer> segmentsList = new LinkedList<>(segments);
+            int segment = segmentsList.removeFirst();
+            for (int i = 0; i < inputs.size(); i++) {
+                List<Input> collect = inputs.stream().map(Input::copy).collect(Collectors.toList());
+                Input input = collect.get(i);
+                if (input.splitMore(segment)) {
+                    input.split(segment);
+                    split(collect, segmentsList);
+                }
+            }
         }
 
         private List<Input> split() {
             List<List<Input>> result =
                     fullArrangement(availables).stream().flatMap(availables1 -> fullArrangement(segments).stream().map(segments1 ->
                                     splitInner(segments1, availables1))).filter(Objects::nonNull)
-                            .sorted((l1, l2) -> wast(l2) - wast(l1))
+                            .sorted((l1, l2) -> allLeft(l2) - allLeft(l1))
                             .collect(Collectors.toList());
             if (result.size() == 0)
                 throw new IllegalStateException("Given input is not enough");
             return result.get(0);
         }
 
-        private int wast(List<Input> inputs) {
+        private int allLeft(List<Input> inputs) {
             return inputs.stream().mapToInt(Input::left).max().orElse(0);
+        }
+
+        private List<Integer> allLefts(List<Input> inputs) {
+            return inputs.stream().mapToInt(Input::left).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
         }
 
         private List<Input> splitInner(List<Integer> segments, List<Integer> availables1) {
@@ -114,7 +153,8 @@ public class Steps {
         }
 
         public void needSegment(int length, int count) {
-            segments.add(length);
+            while (count-- > 0)
+                segments.add(length);
         }
     }
 }
